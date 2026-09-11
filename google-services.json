@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "822539520590",
+    "project_id": "ridermobilapp",
+    "storage_bucket": "ridermobilapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:822539520590:android:82e62e5cdebc3bf824511f",
+        "android_client_info": {
+          "package_name": "com.naeem.cse7.dianarider"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1K-Kj2QHiVX8iNR_LtqTkNpLp1dfwq_8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
