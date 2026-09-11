@@ -148,7 +148,7 @@ const createInvoiceHtml = (invoice: Invoice) => `
     h3 { font-size: 16px; margin: 22px 0 10px; color: #0f172a; } table { width: 100%; border-collapse: collapse; } th { background: #2878c8; color: white; text-align: left; padding: 9px; font-size: 10px; } td { border: 1px solid #e2e8f0; padding: 10px; vertical-align: top; } .total { text-align: right; border-top: 2px solid #2878c8; background: #f8fafc; padding: 14px; font-weight: 800; font-size: 14px; } .amount { color: #2878c8; margin-left: 18px; } .payment { display: inline-block; background: #2878c8; color: white; padding: 8px 10px; font-weight: 800; font-size: 10px; text-transform: uppercase; margin-top: 18px; } footer { border-top: 2px solid #2878c8; margin-top: 20px; padding-top: 10px; color: #64748b; font-size: 10px; }
   </style></head><body>
     <div class="top"><div class="brand"><img class="logo" src="${invoiceLogoUri}" alt="Diana Service Company"><div><h1>Diana Service Logistics</h1><p class="muted">Official maintenance &amp; service</p></div></div><div style="text-align:right"><h2>Invoice</h2><p>Invoice No: <b>${escapeHtml(invoice.invoiceNumber)}</b></p><p>Date: ${escapeHtml(formatInvoiceDate(invoice.completionDate))}</p></div></div>
-    <div class="info"><div><div class="label">Invoice To</div><div class="name">${escapeHtml(invoice.riderName)}</div><p>Rider ID: ${escapeHtml(invoice.riderId)}</p><p>Phone: ${escapeHtml(invoice.riderPhone || 'Not available')}</p></div><div><div class="label">Vehicle Information</div><div class="name">${escapeHtml(invoice.vehicleName)}</div><p>Plate No: ${escapeHtml(invoice.plateNumber)}</p><p>Ticket Ref: #${escapeHtml(invoice.ticketId)}</p></div></div>
+    <div class="info"><div><div class="label">Invoice To</div><div class="name">${escapeHtml(invoice.riderName)}</div><p>Phone: ${escapeHtml(invoice.riderPhone || 'Not available')}</p></div><div><div class="label">Vehicle Information</div><div class="name">${escapeHtml(invoice.vehicleName)}</div><p>Plate No: ${escapeHtml(invoice.plateNumber)}</p><p>Ticket Ref: #${escapeHtml(invoice.ticketId)}</p></div></div>
     <h3>Service Breakdown &amp; Cost Summary</h3><table><thead><tr><th>Problem Category</th><th>Reported Problem &amp; Work Details</th><th>Cost (SAR)</th></tr></thead><tbody><tr><td><b>${escapeHtml(invoice.serviceCategory)}</b></td><td><b>${escapeHtml(invoice.issueTitle)}</b><br><span class="muted">${escapeHtml(invoice.description)}</span></td><td><b>${invoice.subtotal.toFixed(2)} SAR</b></td></tr>${invoice.additionalCharges > 0 ? `<tr><td>Additional Charges</td><td>Service-related charges</td><td><b>${invoice.additionalCharges.toFixed(2)} SAR</b></td></tr>` : ''}</tbody></table>
     <div class="total">Total Approved Amount: <span class="amount">${invoice.totalAmount.toFixed(2)} SAR</span></div><div class="payment">Payment Status: ${escapeHtml(invoice.status)}</div><p class="muted" style="float:right;margin-top:24px">Completed: ${escapeHtml(formatInvoiceDate(invoice.completionDate))}</p><footer>Diana Service Logistics · Maintenance &amp; Service Center · Ticket #${escapeHtml(invoice.ticketId)}</footer>
   </body></html>`;
@@ -362,6 +362,8 @@ function AppContent() {
   const assignedVehicle = assignedVehicleRecord?.modelName || 'No vehicle assigned';
   const assignedPlate = assignedVehicleRecord?.plateNumber || 'Not assigned';
   const oilChangeStatus = getOilChangeStatus(assignedVehicleRecord?.lastOilChangeDate);
+  const displayName = rider?.fullName || 'Rider';
+  const displayUsername = rider?.username ? `@${rider.username}` : '@rider';
 
   const showMessage = (message: string) => {
     setToast(message);
@@ -878,8 +880,8 @@ function AppContent() {
                 <Image source={require('./assets/icon.png')} style={styles.headerLogo} />
                 <View style={styles.headerCopy}>
                   <Text style={styles.headerEyebrow}>Diana Rider</Text>
-                  <Text style={styles.headerName} numberOfLines={1}>{username}</Text>
-                  <Text style={styles.headerMeta} numberOfLines={1}>ID  {rider?.id || 'Loading'}</Text>
+                  <Text style={styles.headerName} numberOfLines={1}>{displayName}</Text>
+                  <Text style={styles.headerUsername} numberOfLines={1}>{displayUsername}</Text>
                 </View>
               </View>
               <View style={styles.headerActions}>
@@ -904,13 +906,13 @@ function AppContent() {
           <View style={{ paddingHorizontal: headerLeftInset - insets.left, paddingRight: headerRightInset - insets.right }}>
             <ScreenFade id={activeTab}>
               {activeTab === 'dashboard' ? (
-                <Dashboard greetingName={username} activeTickets={activeTickets} resolvedTickets={resolvedTickets} recentTicket={recentTicket} oilChangeStatus={oilChangeStatus} isLoading={isLoading} onNewTicket={() => setActiveTab('ticket')} onHistory={() => setActiveTab('history')} />
+                <Dashboard greetingName={displayName} activeTickets={activeTickets} resolvedTickets={resolvedTickets} recentTicket={recentTicket} oilChangeStatus={oilChangeStatus} isLoading={isLoading} onNewTicket={() => setActiveTab('ticket')} onHistory={() => setActiveTab('history')} />
               ) : null}
               {activeTab === 'ticket' ? (
                 <TicketForm categories={categories} issue={issue} vehicle={assignedVehicle} plate={assignedPlate} onCategories={setCategories} onIssue={setIssue} onSubmit={submitTicket} onInputFocus={scrollFocusedInputIntoView} />
               ) : null}
               {activeTab === 'history' ? <History tickets={tickets} isLoading={isLoading} onInvoice={(ticket) => openInvoice(ticket.id, ticket.invoiceId)} /> : null}
-              {activeTab === 'profile' ? <Profile rider={rider} vehicle={assignedVehicleRecord} profileImageUri={profileImageUri} expoPushToken={expoPushToken} notification={notification} isSendingNotification={isSendingNotification} onChooseImage={chooseProfileImage} onSendNotification={sendTestNotification} onLogout={logout} /> : null}
+              {activeTab === 'profile' ? <Profile rider={rider} vehicle={assignedVehicleRecord} profileImageUri={profileImageUri} expoPushToken={expoPushToken} notification={notification} isSendingNotification={isSendingNotification} onChooseImage={chooseProfileImage} onSendNotification={sendTestNotification} /> : null}
             </ScreenFade>
           </View>
         </ScrollView>
@@ -999,7 +1001,6 @@ function AppContent() {
                   <View style={styles.invoiceDetailsColumn}>
                     <Text style={styles.invoiceSectionTitle}>RIDER INFORMATION</Text>
                     <Text style={styles.invoiceValueLarge}>{selectedInvoice.riderName}</Text>
-                    <Text style={styles.invoiceDetailText}>Rider ID: {selectedInvoice.riderId}</Text>
                     <Text style={styles.invoiceDetailText}>Phone: {selectedInvoice.riderPhone || 'Not available'}</Text>
                   </View>
                   <View style={styles.invoiceDetailsColumn}>
@@ -1208,8 +1209,9 @@ function History({ tickets, isLoading, onInvoice }: { tickets: Ticket[]; isLoadi
   );
 }
 
-function Profile({ rider, vehicle, profileImageUri, expoPushToken, notification, isSendingNotification, onChooseImage, onSendNotification, onLogout }: { rider: Rider | null; vehicle?: Vehicle; profileImageUri: string | null; expoPushToken: string; notification?: Notifications.Notification; isSendingNotification: boolean; onChooseImage: () => void; onSendNotification: () => void; onLogout: () => void }) {
-  const displayName = rider?.fullName || rider?.username || 'Rider';
+function Profile({ rider, vehicle, profileImageUri, expoPushToken, notification, isSendingNotification, onChooseImage, onSendNotification }: { rider: Rider | null; vehicle?: Vehicle; profileImageUri: string | null; expoPushToken: string; notification?: Notifications.Notification; isSendingNotification: boolean; onChooseImage: () => void; onSendNotification: () => void }) {
+  const displayName = rider?.fullName || 'Rider';
+  const displayUsername = rider?.username ? `@${rider.username}` : '@rider';
   const salary = Number(rider?.salary) || 0;
   const vehicleName = vehicle?.modelName || 'No vehicle assigned';
   const vehiclePlate = vehicle?.plateNumber || 'Not assigned';
@@ -1237,8 +1239,7 @@ function Profile({ rider, vehicle, profileImageUri, expoPushToken, notification,
         </Pressable>
         <View style={styles.profileHeroCopy}>
           <Text style={styles.profileName}>{displayName}</Text>
-          <Text style={styles.profileRole}>Delivery rider</Text>
-          <Text style={styles.profileId}>Rider ID  ·  {rider?.id || 'Not available'}</Text>
+          <Text style={styles.profileUsername}>{displayUsername}</Text>
         </View>
       </View>
       <View style={styles.salaryCard}>
@@ -1267,10 +1268,6 @@ function Profile({ rider, vehicle, profileImageUri, expoPushToken, notification,
           <Detail label="Odometer" value={vehicle?.currentOdo !== undefined ? `${vehicle.currentOdo} km` : 'Not available'} />
         </View>
       </View>
-      <SoftPressable style={styles.logoutButton} onPress={onLogout} accessibilityLabel="Log out">
-        <MaterialCommunityIcons name="logout-variant" size={18} color="#bd4545" />
-        <Text style={styles.logoutButtonText}>Log out</Text>
-      </SoftPressable>
     </View>
   );
 }
@@ -1372,8 +1369,6 @@ const styles = StyleSheet.create({
   notificationReady: { backgroundColor: '#eef8f5' },
   notificationPending: { backgroundColor: '#fff8e8' },
   notificationEmpty: { color: '#94a1a4', fontSize: 12, marginTop: 10 },
-  logoutButton: { borderColor: '#f0c9c9', backgroundColor: '#fff7f7', borderWidth: 1, borderRadius: 14, paddingHorizontal: 18, paddingVertical: 14, marginTop: 4, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 50 },
-  logoutButtonText: { color: '#bd4545', fontWeight: '700', fontSize: 14 },
   invoiceBrandLogo: { width: 42, height: 42, borderRadius: 12 },
   invoiceBrandCopy: { flex: 1 },
   closeButton: { paddingHorizontal: 8, paddingVertical: 8 },
@@ -1413,7 +1408,7 @@ const styles = StyleSheet.create({
   header: { width: '100%', alignSelf: 'stretch', backgroundColor: '#0f766e', borderBottomLeftRadius: 28, borderBottomRightRadius: 28, paddingVertical: 18, shadowColor: '#064e49', shadowOpacity: 0.22, shadowRadius: 14, elevation: 6 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   headerName: { color: '#fff', fontSize: 22, fontWeight: '800', marginTop: 2, letterSpacing: -0.4 },
-  headerMeta: { color: '#c6e7e2', fontSize: 12, marginTop: 3, fontWeight: '600' },
+  headerUsername: { color: '#fff', fontSize: 12, marginTop: 3, fontWeight: '400' },
   headerActions: { flexDirection: 'row', gap: 8 },
   headerButton: { backgroundColor: '#176d68', borderColor: '#4b9b93', borderWidth: 1, borderRadius: 12, paddingHorizontal: 11, paddingVertical: 9, height: 44, width: 44, alignItems: 'center', justifyContent: 'center' },
   vehicleBanner: { backgroundColor: '#fff', borderRadius: 16, marginTop: 18, padding: 14, flexDirection: 'row', alignItems: 'center', shadowColor: '#064e49', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 },
@@ -1489,7 +1484,6 @@ const styles = StyleSheet.create({
   issueInput: { minHeight: 120, textAlignVertical: 'top' },
   profileHero: { backgroundColor: '#fff', borderColor: '#dbe7e4', borderWidth: 1, borderRadius: 20, padding: 22, alignItems: 'center', shadowColor: '#173337', shadowOpacity: 0.05, shadowRadius: 10, elevation: 1 },
   profileHeroCopy: { alignItems: 'center', marginTop: 16 },
-  profileId: { color: '#94a1a4', fontSize: 11, marginTop: 8, fontWeight: '600' },
   profileSection: { backgroundColor: '#fff', borderColor: '#dbe7e4', borderWidth: 1, borderRadius: 18, padding: 17, shadowColor: '#173337', shadowOpacity: 0.04, shadowRadius: 8, elevation: 1 },
   profileSectionTitle: { color: '#0f766e', fontSize: 11, fontWeight: '800', letterSpacing: 1.1, marginBottom: 4 },
   notificationStatus: { color: '#647779', fontSize: 13, lineHeight: 19, flex: 1 },
@@ -1503,7 +1497,7 @@ const styles = StyleSheet.create({
   profileImage: { width: 110, height: 110, borderRadius: 55 },
   photoBadge: { position: 'absolute', right: 2, bottom: 2, width: 28, height: 28, borderRadius: 14, backgroundColor: '#0f766e', borderColor: '#fff', borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   profileName: { color: '#10252a', fontSize: 24, fontWeight: '800' },
-  profileRole: { color: '#64748b', fontSize: 13, textAlign: 'center', marginTop: 5, fontWeight: '600' },
+  profileUsername: { color: '#64748b', fontSize: 13, marginTop: 4, fontWeight: '400' },
   secondaryButton: { borderColor: '#c9ddd8', backgroundColor: '#f6faf9', borderWidth: 1, borderRadius: 14, paddingHorizontal: 18, paddingVertical: 14, minHeight: 50, marginTop: 16 },
   notificationButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 14 },
   secondaryButtonText: { color: '#29434a', fontWeight: '700', fontSize: 14 },
