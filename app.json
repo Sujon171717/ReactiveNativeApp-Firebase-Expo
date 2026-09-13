@@ -7,9 +7,12 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.naeem.cse7.dianarider",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
-    
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
